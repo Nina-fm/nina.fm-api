@@ -1,11 +1,21 @@
 {
-  "presets": ["env"],
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "16.14.0"
+        }
+      }
+    ]
+  ],
   "plugins": [
     [
       "module-resolver",
       {
         "root": ["./"]
       }
-    ]
+    ],
+    ["transform-object-rest-spread", { "useBuiltIns": true }]
   ]
 }

@@ -1,5 +1,5 @@
+import { MixtapesService } from "../src/services/mixtapes.service";
 import bodyParser from "body-parser";
-import compression from "compression";
 import cors from "cors";
 import customLogger from "./utils/logger";
 import express from "express";
@@ -8,9 +8,7 @@ import serverless from "serverless-http";
 
 const app = express();
 const router = express.Router();
-
-// gzip responses
-router.use(compression());
+const service = new MixtapesService();
 
 // Set router base path for local dev
 const routerBasePath =
@@ -18,29 +16,20 @@ const routerBasePath =
     ? `/mixtapes`
     : `/.netlify/functions/mixtapes/`;
 
-/* define routes */
+// ROUTES Definitions
 
-router.get("/", (req, res) => {
-  const html = `Nina.fm API`;
-  res.send(html);
+router.get("/", async (req, res) => {
+  const mixtapes = await service.findAll();
+  res.json(mixtapes);
 });
 
-router.get("/users", (req, res) => {
-  res.json({
-    users: [
-      {
-        name: "steve",
-      },
-      {
-        name: "joe",
-      },
-    ],
-  });
+router.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  const mixtape = await service.findById(id);
+  res.json(mixtape);
 });
 
-router.get("/hello/", function (req, res) {
-  res.send("hello world");
-});
+// eof ROUTES Definitions
 
 // Attach logger
 app.use(morgan(customLogger));

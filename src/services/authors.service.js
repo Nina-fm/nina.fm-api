@@ -1,6 +1,14 @@
 import { supabase } from "../lib/supabase";
 
 export class AuthorsService {
+  static formatAuthor(author) {
+    return {
+      ...author,
+      avatar_url: author.avatar ? supabase.storage.from("avatars").getPublicUrl(author.avatar)
+      .data.publicUrl : null
+    }
+  }
+
   /**
    * Trouve tous les authors
    */
@@ -11,7 +19,7 @@ export class AuthorsService {
 
     if (error) console.log(error);
 
-    return authors;
+    return authors.map((author) => AuthorsService.formatAuthor(author));
   }
 
   /**
@@ -26,7 +34,7 @@ export class AuthorsService {
 
     if (error) console.log(error);
 
-    return author;
+    return AuthorsService.formatAuthor(author);
   }
 
 }

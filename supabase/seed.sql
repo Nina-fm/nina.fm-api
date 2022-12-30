@@ -12,7 +12,7 @@ VALUES
 
 -- Insert profiles
 INSERT INTO 
-"public"."authors" ("id", "user_id", "updated_at", "name", "avatar_url")
+"public"."authors" ("id", "user_id", "updated_at", "name", "avatar")
 VALUES 
 (1, 'ee7841ac-aa19-4f04-9560-28075f87a308', '2022-11-08 13:59:57.739+00', '120', null),
 (2, null, '2022-12-23 09:34:00.739+00', 'Costiloui', null),

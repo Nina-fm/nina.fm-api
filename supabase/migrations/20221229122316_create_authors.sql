@@ -3,7 +3,7 @@ create table "public"."authors" (
     "user_id" uuid,
     "updated_at" timestamp with time zone,
     "name" text,
-    "avatar_url" text
+    "avatar" text
 );
 
 

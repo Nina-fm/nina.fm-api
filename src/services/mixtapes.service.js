@@ -1,25 +1,26 @@
+import { AuthorsService } from "./authors.service";
 import { supabase } from "../lib/supabase";
 
 export class MixtapesService {
-  formatMixtape(mixtape) {
-    const coverUrl = supabase.storage
-      .from("covers")
-      .getPublicUrl(mixtape.cover);
-
+  static formatMixtape(mixtape) {
     return {
       ...mixtape,
-      cover_url: coverUrl.data.publicUrl,
-      authors: mixtape.authors ? mixtape.authors.map(
-        ({ author, mixtape_id, author_id, ...rest }) => ({
-          ...rest,
-          ...author,
-        })
-      ) : [],
-      tracks: mixtape.tracks ? mixtape.tracks.map(
-        ({ id, created_at, mixtape_id, ...track }) => ({
-          ...track,
-        })
-      ) : [],
+      cover_url: supabase.storage.from("covers").getPublicUrl(mixtape.cover)
+        .data.publicUrl,
+      authors: mixtape.authors
+        ? mixtape.authors.map(({ author, mixtape_id, author_id, ...rest }) => {
+            const { updated_at, ...authorRest } = author;
+            return AuthorsService.formatAuthor({
+              ...rest,
+              ...authorRest,
+            });
+          })
+        : [],
+      tracks: mixtape.tracks
+        ? mixtape.tracks.map(({ id, created_at, mixtape_id, ...track }) => ({
+            ...track,
+          }))
+        : [],
     };
   }
 
@@ -33,7 +34,7 @@ export class MixtapesService {
 
     if (error) console.log(error);
 
-    return mixtapes.map((mixtape) => this.formatMixtape(mixtape));
+    return mixtapes.map((mixtape) => MixtapesService.formatMixtape(mixtape));
   }
 
   /**
@@ -48,6 +49,6 @@ export class MixtapesService {
 
     if (error) console.log(error);
 
-    return this.formatMixtape(mixtape);
+    return MixtapesService.formatMixtape(mixtape);
   }
 }

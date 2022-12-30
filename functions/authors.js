@@ -16,4 +16,4 @@ router.get("/:id", async (req, res) => {
   res.json(author);
 });
 
-exports.handler = serverless(app);
+export const handler = serverless(app);

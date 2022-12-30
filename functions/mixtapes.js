@@ -16,4 +16,4 @@ router.get("/:id", async (req, res) => {
   res.json(mixtape);
 });
 
-exports.handler = serverless(app);
+export const handler = serverless(app);

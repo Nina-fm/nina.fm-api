@@ -16,4 +16,10 @@ CREATE UNIQUE INDEX mixtapes_pkey ON public.mixtapes USING btree (id);
 
 alter table "public"."mixtapes" add constraint "mixtapes_pkey" PRIMARY KEY using index "mixtapes_pkey";
 
+create policy "Public mixtapes are viewable by everyone."
+on "public"."mixtapes"
+as permissive
+for select
+to public
+using (true);
 

@@ -20,4 +20,9 @@ alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_mixtape
 
 alter table "public"."mixtapes_authors" validate constraint "mixtapes_authors_mixtape_id_fkey";
 
-
+create policy "Public mixtapes_authors are viewable by everyone."
+on "public"."mixtapes_authors"
+as permissive
+for select
+to public
+using (true);

@@ -20,4 +20,10 @@ alter table "public"."tracks" add constraint "tracks_mixtape_id_fkey" FOREIGN KE
 
 alter table "public"."tracks" validate constraint "tracks_mixtape_id_fkey";
 
+create policy "Public tracks are viewable by everyone."
+on "public"."tracks"
+as permissive
+for select
+to public
+using (true);
 

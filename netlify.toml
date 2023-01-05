@@ -3,3 +3,4 @@
   command = "npm install && npm run build"
   # functions build directory
   functions = "functions-build"
+  targetPort = 1234

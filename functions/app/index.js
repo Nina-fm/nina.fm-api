@@ -1,7 +1,9 @@
+import ExceptionHandler from "../../src/lib/exceptions/exception.handler";
 import bodyParser from "body-parser";
 import cors from "cors";
 import customLogger from "../utils/logger";
 import express from "express";
+import methodOverride from "method-override";
 import morgan from "morgan";
 
 const App = (name) => {
@@ -25,10 +27,11 @@ const App = (name) => {
   router.use(bodyParser.json());
   router.use(bodyParser.urlencoded({ extended: true }));
 
-  return {
-    app,
-    router
-  }
+  // Error handler
+  app.use(methodOverride());
+  app.use(ExceptionHandler);
+
+  return { app, router };
 };
 
-export default App
+export default App;

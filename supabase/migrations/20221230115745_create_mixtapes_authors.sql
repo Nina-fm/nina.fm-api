@@ -12,11 +12,11 @@ CREATE UNIQUE INDEX mixtapes_authors_pkey ON public.mixtapes_authors USING btree
 
 alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_pkey" PRIMARY KEY using index "mixtapes_authors_pkey";
 
-alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_author_id_fkey" FOREIGN KEY (author_id) REFERENCES authors(id) not valid;
+alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_author_id_fkey" FOREIGN KEY (author_id) REFERENCES authors(id) on delete cascade not valid;
 
 alter table "public"."mixtapes_authors" validate constraint "mixtapes_authors_author_id_fkey";
 
-alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_mixtape_id_fkey" FOREIGN KEY (mixtape_id) REFERENCES mixtapes(id) not valid;
+alter table "public"."mixtapes_authors" add constraint "mixtapes_authors_mixtape_id_fkey" FOREIGN KEY (mixtape_id) REFERENCES mixtapes(id) on delete cascade not valid;
 
 alter table "public"."mixtapes_authors" validate constraint "mixtapes_authors_mixtape_id_fkey";
 
@@ -25,4 +25,18 @@ on "public"."mixtapes_authors"
 as permissive
 for select
 to public
+using (true);
+
+create policy "Enable insert for anon."
+on "public"."mixtapes_authors"
+as permissive
+for insert
+to anon
+with check (true);
+
+create policy "Enable delete for anon."
+on "public"."mixtapes_authors"
+as permissive
+for delete
+to anon
 using (true);

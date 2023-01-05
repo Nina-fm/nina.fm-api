@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 
 export class AuthorsService {
-  static formatAuthor(author) {
+  static format(author) {
     return {
       ...author,
       avatar_url: author.avatar
@@ -20,9 +20,9 @@ export class AuthorsService {
       .from("authors")
       .select("*, mixtapes:mixtapes_authors(id)");
 
-    if (error) console.log(error);
+    if (error) throw new Error(error.message);
 
-    return authors.map((author) => AuthorsService.formatAuthor(author));
+    return authors.map((author) => AuthorsService.format(author));
   }
 
   /**
@@ -35,8 +35,23 @@ export class AuthorsService {
       .eq("id", id)
       .single();
 
-    if (error) console.log(error);
+    if (error) throw new Error(error.message);
 
-    return AuthorsService.formatAuthor(author);
+    return AuthorsService.format(author);
+  }
+
+  /**
+   * Create new author
+   */
+  async create(authorData) {
+    const { data: author, error } = await supabase
+      .from("authors")
+      .insert([authorData])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    return author;
   }
 }

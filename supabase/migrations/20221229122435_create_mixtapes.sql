@@ -27,13 +27,20 @@ create policy "Enable insert for anon."
 on "public"."mixtapes"
 as permissive
 for insert
-to anon
+to authenticated, anon
 with check (true);
+
+create policy "Enable update for anon."
+on "public"."mixtapes"
+as permissive
+for update
+to authenticated, anon
+using (true);
 
 create policy "Enable delete for anon."
 on "public"."mixtapes"
 as permissive
 for delete
-to anon
+to authenticated, anon
 using (true);
 

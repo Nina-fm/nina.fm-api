@@ -46,8 +46,15 @@ create policy "Enable insert for anon."
 on "public"."authors"
 as permissive
 for insert
-to anon
+to authenticated, anon
 with check (true);
+
+create policy "Enable update for anon."
+on "public"."authors"
+as permissive
+for update
+to authenticated, anon
+using (true);
 
 create policy "Users can update own author profile."
 on "public"."authors"

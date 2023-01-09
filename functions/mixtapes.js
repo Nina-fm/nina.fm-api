@@ -28,22 +28,10 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
-  try {
-    const id = req.params.id;
-    const deleted = await _mixtapes.delete(id);
-    res.status(200).send(deleted);
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.post("/", async (req, res, next) => {
   try {
-    const { authors, tracks, ...data } = _mixtapes.validateData(
-      req.body
-    );
-    
+    const { authors, tracks, ...data } = _mixtapes.validateData(req.body);
+
     // Create the mixtape
     const mixtape = await _mixtapes.create(data);
     // Add all authors to the mixtape and create them if not exists
@@ -53,14 +41,50 @@ router.post("/", async (req, res, next) => {
       )
     );
     const authorsIds = allAuthors.map((a) => a.id);
-    const mixtapesAuthors = await _mixtapes.addAuthors(
-      mixtape.id,
-      authorsIds
-    );
+    const mixtapesAuthors = await _mixtapes.addAuthors(mixtape.id, authorsIds);
     // Create all tracks
     const allTracks = await _tracks.createForMixtape(tracks, mixtape.id);
 
     res.status(201).json(mixtape);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { authors, tracks, ...data } = req.body;
+
+    // Create the mixtape
+    const mixtape = await _mixtapes.update(id, data);
+
+    if (authors) {
+      // Add all authors to the mixtape and create them if not exists
+      const allAuthors = await Promise.all(
+        authors.map(async (author) =>
+          !author.id ? await _authors.create(author) : author
+        )
+      );
+      const authorsIds = allAuthors.reduce((res, a) => [...res, a.id], []);
+      const mixtapesAuthors = await _mixtapes.updateAuthors(id, authorsIds);
+    }
+    if (tracks) {
+      // Create all tracks
+      const allTracks = await _tracks.updateForMixtape(tracks, id);
+    }
+
+    res.status(200).json(mixtape);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const deleted = await _mixtapes.delete(id);
+    res.status(200).send(deleted);
   } catch (error) {
     next(error);
   }

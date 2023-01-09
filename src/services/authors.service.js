@@ -1,6 +1,9 @@
 import { supabase } from "../lib/supabase";
 
 export class AuthorsService {
+  /**
+   * Format Author data
+   */
   static format(author) {
     return {
       ...author,
@@ -13,12 +16,12 @@ export class AuthorsService {
   }
 
   /**
-   * Trouve tous les authors
+   * Fetch all authors
    */
-  async findAll() {
+  async getAll() {
     const { data: authors, error } = await supabase
       .from("authors")
-      .select("*, mixtapes:mixtapes_authors(id)");
+      .select("*");
 
     if (error) throw new Error(error.message);
 
@@ -26,12 +29,12 @@ export class AuthorsService {
   }
 
   /**
-   * Trouve un author par id
+   * Find an author by ID
    */
-  async findById(id) {
+  async getByID(id) {
     const { data: author, error } = await supabase
       .from("authors")
-      .select("*, mixtapes:mixtapes_authors(id)")
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -41,7 +44,21 @@ export class AuthorsService {
   }
 
   /**
-   * Create new author
+   * Find authors by name
+   */
+  async findByName(name) {
+    const { data: authors, error } = await supabase
+      .from("authors")
+      .select("*")
+      .ilike("name", `%${name}%`);
+
+    if (error) throw new Error(error.message);
+
+    return AuthorsService.format(authors);
+  }
+
+  /**
+   * Create a new author
    */
   async create(authorData) {
     const { data: author, error } = await supabase
@@ -53,5 +70,32 @@ export class AuthorsService {
     if (error) throw new Error(error.message);
 
     return author;
+  }
+
+  /**
+   * Update an author
+   */
+  async update(id, authorData) {
+    const { data: author, error } = await supabase
+      .from("authors")
+      .update({ ...authorData, updated_at: new Date() })
+      .eq("id", id)
+      .select();
+
+    if (error) throw new Error(error.message);
+
+    return author;
+  }
+
+  /**
+   * Delete an author by ID
+   */
+  async delete(id) {
+    const { error } = await supabase.from("authors").delete().eq("id", id);
+
+    if (error) throw new Error(error.message);
+
+    console.log({ error });
+    return true;
   }
 }

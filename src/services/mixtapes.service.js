@@ -4,6 +4,9 @@ import { AuthorsService } from "./authors.service";
 import { supabase } from "../lib/supabase";
 
 export class MixtapesService {
+  /**
+   * Format mixtape data
+   */
   static format(mixtape) {
     return {
       ...mixtape,
@@ -28,10 +31,12 @@ export class MixtapesService {
     };
   }
 
+  /**
+   * Validate mixtape POST Data or throwing errors
+   */
   validateData(data) {
     const { authors, tracks, ...mixtapeData } = data;
 
-    console.log({ data });
     if (!authors || !authors.length) {
       throw new BadRequestException("Mixtape should have at least one author.");
     }
@@ -44,7 +49,7 @@ export class MixtapesService {
   }
 
   /**
-   * Trouve toutes les mixtapes
+   * Fetch all mixtapes
    */
   async findAll() {
     const { data: mixtapes, error } = await supabase
@@ -57,7 +62,7 @@ export class MixtapesService {
   }
 
   /**
-   * Trouve une mixtape par id
+   * Find a mixtape by ID
    */
   async find(id) {
     const { data: mixtape, error } = await supabase
@@ -66,16 +71,19 @@ export class MixtapesService {
       .eq("id", id)
       .single();
 
-    if (error.code === "PGRST116")
-      throw new NotFoundException("Resource not found.");
-
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (error.code === "PGRST116") {
+        throw new NotFoundException("Resource not found.");
+      } else {
+        throw new Error(error.message);
+      }
+    }
 
     return MixtapesService.format(mixtape);
   }
 
   /**
-   * Assign authors to mixtape
+   * Add authors to mixtape
    */
   async addAuthors(id, authorIds = []) {
     const { error } = await supabase.from("mixtapes_authors").insert(
@@ -83,14 +91,46 @@ export class MixtapesService {
         author_id: authorId,
         mixtape_id: id,
         position,
-      }))
+      })),
+      { upsert: true }
     );
 
     if (error) throw new Error(error.message);
   }
 
   /**
-   * Crée une nouvelle mixtape
+   * Update authors to mixtape
+   */
+  async updateAuthors(id, authorIds = []) {
+    const { data: existing } = await supabase
+      .from("mixtapes_authors")
+      .select("*")
+      .eq("mixtape_id", id);
+
+    const toDeleteIds = existing
+      .filter((ma) => !authorIds.includes(ma.author_id))
+      .reduce((res, ma) => [...res, ma.author_id], []);
+
+    const { error: deleteError } = await supabase
+      .from("mixtapes_authors")
+      .delete()
+      .eq("mixtape_id", id)
+      .in("author_id", toDeleteIds);
+
+    const { error } = await supabase.from("mixtapes_authors").upsert(
+      authorIds.map((authorId, position) => ({
+        author_id: authorId,
+        mixtape_id: id,
+        position,
+      })),
+      { onConflict: "mixtape_id,author_id" }
+    );
+
+    if (error) throw new Error(error.message);
+  }
+
+  /**
+   * Create a new mixtape
    */
   async create(mixtapeData) {
     const { data: mixtape, error } = await supabase
@@ -105,11 +145,27 @@ export class MixtapesService {
   }
 
   /**
+   * Update a mixtape by ID
+   */
+  async update(id, mixtapeData) {
+    console.log({ id, mixtapeData });
+    const { data: mixtape, error } = await supabase
+      .from("mixtapes")
+      .update({ ...mixtapeData, updated_at: new Date() })
+      .eq("id", id)
+      .select();
+
+    if (error) throw new Error(error.message);
+
+    return mixtape;
+  }
+
+  /**
    * Delete a mixtape by ID
    */
   async delete(id) {
     const { error } = await supabase.from("mixtapes").delete().eq("id", id);
-    
+
     if (error) throw new Error(error.message);
 
     console.log({ error });
